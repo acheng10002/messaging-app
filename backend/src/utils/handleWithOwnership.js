@@ -9,7 +9,8 @@ async function handleWithOwnership({ fetchResource, userId, action }) {
   on e.g. a db query */
   const resource = await fetchResource();
   /* userId - id of the currently authenticated user
-  checks if current user is allowed to perform this action */
+  checks if current user is allowed to perform this action 
+  if not, an error will be thrown */
   authorizeOwnership(resource, userId);
   /* action - callback for the action to perform if ownership is confirmed 
   and returns the result of the action */

@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+/* top-level component wrapoing entire app 
+contains global routing and layout */
+/* Routes - parent warapper for all route definitions 
+Route - individual route and route hierarchies */
+import { Routes, Route, useNavigate } from "react-router-dom";
+import "./App.css";
 
-function App() {
-  const [count, setCount] = useState(0)
-
+const App = () => {
+  const navigate = useNavigate();
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <Routes>
+      {/* layout route wraps child routes in a shared layout containing just Header */}
+      <Route element={<AuthLayout />}>
+        {/* two child routes */}
+        <Route
+          path="/users/register"
+          element={
+            <UserForm
+              mode="register"
+              onRegisterSuccess={() => navigate("/auth/login")}
+            />
+          }
+        />
+        <Route
+          path="/auth/login"
+          element={
+            <UserForm
+              mode="login"
+              onLoginSuccess={(user) => navigate(`/users/${user.id}/chats`)}
+            />
+          }
+        />
+      </Route>
+      {/* layout route wraps child routes in a shared layout containing Header and Sidebar */}
+      <Route element={<MainLayout />}>
+        {/* two child routes */}
+        <Route path="/users/:userid/chats" element={<ChatPanel />} />
+        <Route path="/users/:userid/chats/:chatid" element={<ChatView />} />
+      </Route>
+    </Routes>
+  );
+};
 
-export default App
+export default App;

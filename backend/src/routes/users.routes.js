@@ -1,4 +1,4 @@
-/* defines HTTP /users routes 
+/* defines user-related HTTP route paths and binds them to users.controller functions
 POST /users/
 GET /users/1/chats */
 // server framework
@@ -13,7 +13,7 @@ const { registerController } = require("../controllers/users.controller");
 const userValidationRules = require("../validators/userValidation");
 const { validate } = require("../validators/validate");
 
-// POST /users/ WORKS
+// POST /users/register /////////////////////////////// WORKS
 // this file is mounted on /users in app.js
 // user submits registration details
 router.post("/register", userValidationRules, validate, registerController);

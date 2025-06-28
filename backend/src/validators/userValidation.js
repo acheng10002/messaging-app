@@ -1,4 +1,5 @@
-/* backend validation that enforces same rules as the client-side
+/* gets all validators errors
+backend validation that enforces same rules as the client-side
 imports body function from middleware for validating and sanitizing request data in Express.js */
 const { body } = require("express-validator");
 

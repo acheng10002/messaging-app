@@ -1,6 +1,7 @@
-// holds db queries/business rules
-// db access layer
+/* holds authentication-related db queries/business rules
+db access layer */
 const prisma = require("../db/prisma");
+// custom error
 const ApiError = require("../utils/ApiError");
 
 async function setUserOnline(userId) {
@@ -12,6 +13,7 @@ async function setUserOnline(userId) {
     });
   } catch (err) {
     console.error(`Failed to set user ${userId} online:`, err);
+    // custom error for known error
     throw new ApiError(500, "Unable to update user status to online");
   }
 }
@@ -25,6 +27,7 @@ async function setUserOffline(userId) {
     });
   } catch (err) {
     console.error(`Failed to set user ${userId} offline:`, err);
+    // custom error for known error
     throw new ApiError(500, "Unable to update user status to offline");
   }
 }

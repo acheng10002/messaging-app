@@ -1,3 +1,5 @@
+/* main Express app config file - initialize and config HTTP server and middleware
+before it's passed to to the actual server entry point, server.js */
 // server framework that handles routing & middleware
 const express = require("express");
 // raw passport lib for handling authentication
@@ -17,9 +19,10 @@ const messageRoutes = require("./routes/messages.routes");
 const app = express();
 
 /* global middleware that parses incoming JSON request bodies, req.body, 
-used for API endpoints - the Express backend can handle the parsed JSON
+during the handling of HTTP requests to my API endpoints- the Express 
+backend can handle the parsed JSON
 request body as a plain JS object in req.body 
-const { email, password, name } = req.body; */
+ex. const { email, password, name } = req.body; */
 app.use(express.json());
 
 /* global middleware parses incoming URL-encoded HTTP request bodies,  
@@ -31,11 +34,11 @@ and can be accessed in my route handler
 const { email, password } = req.body */
 app.use(express.urlencoded({ extended: true }));
 
-// registers the authentication strategy inside Passport
+// registers/defines the authentication strategy inside Passport
 passport.use(localStrategy);
-// registers the authorization strategy inside Passport
+// registers/defines the authorization strategy inside Passport
 passport.use(jwtStrategy);
-// initializes Passport middleware to handle authentication
+// initializes.mounts Passport middleware to handle authentication
 app.use(passport.initialize());
 // route handler that redirects user from root to /auth/login
 app.get("/", (req, res) => {
@@ -43,9 +46,15 @@ app.get("/", (req, res) => {
 });
 
 /* router-level middleware - route definitions that registers routers into 
-my main app 
-- backend routes use both HTTP method and the path to distinguish routes,
-- it's valid, standard RESTful design 
+                             my main app 
+- route - are differentiated by both HTTP methods and their paths
+- route handler - function that runs when a matching route is hit
+                  controller functions are route handlers
+- router - container of related routes and their handlers
+- REST - representational state transfer
+         resources (users, messages, chats, etc.) are represented as as URLs
+         state gets transferred using HTTP methods: GET to retrieve data, POST
+         to create DATA, PUT/PATCH to update data, DELETE to remove data
 - Express routes requests to different handlers based on the HTTP method used,
   even if the URL path is the same */
 app.use("/auth", authRoutes);
@@ -54,3 +63,8 @@ app.use("/users", chatRoutes);
 app.use("/users", messageRoutes);
 
 module.exports = app;
+
+/* package.json - project's metadata and declared dependencies
+package-lock.json - has the exact version of every installed package and its dependencies
+node_modules - directory in my Node.js project that contains all the installed packages
+               including my direct dependencies and their dependencies */

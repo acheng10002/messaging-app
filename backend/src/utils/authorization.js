@@ -1,4 +1,5 @@
-// throws an error if the user isn't the owner of the resource
+/* utility that throws an error if the user isn't the owner of the resource 
+custom error */
 const ApiError = require("./ApiError");
 
 function authorizeOwnership(resource, userId) {
@@ -6,7 +7,7 @@ function authorizeOwnership(resource, userId) {
   if (!resource) {
     throw new ApiError(404, "Resource not found");
   }
-  // return status if specific resource not owned by current user
+  // return status and custom error if specific resource not owned by current user
   if (resource.authorId !== userId) {
     throw new ApiError(403, "Not authorized to perform this action");
   }

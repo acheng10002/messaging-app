@@ -1,4 +1,4 @@
-// custom error class that extends the built-in `Error` class
+// utility, custom error class that extends the built-in `Error` class for a known error
 class ApiError extends Error {
   // constructor gets called automatically when a new instance of ApiError is created
   constructor(statusCode, message) {
@@ -10,7 +10,7 @@ class ApiError extends Error {
     /* maintains proper stack trace for Node.js (for all V8 engines) from this point,
       omitting internal constructor calls 
       V8 engine - JS open-source engine devloped by Google, it's written in C++ and 
-      compiles CSS directly to machine code */
+                  compiles CSS directly to machine code */
     Error.captureStackTrace(this, this.constructor);
   }
 }

@@ -1,5 +1,10 @@
+// my app's data model and db schema
 generator client {
-  // tells Prisma to generate a client lib I will use to query the db
+  /**
+   * ORM - tool that lets me interact with a relational db using JS objects
+   * instead of raw SQL queries
+   * tells Prisma to generate a client lib I will use to query the db
+   */
   provider = "prisma-client-js"
 }
 

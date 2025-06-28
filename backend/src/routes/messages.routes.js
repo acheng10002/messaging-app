@@ -1,4 +1,5 @@
-// server framework
+/* defines message-related HTTP route paths and binds them to messages.controller functions
+server framework */
 const express = require("express");
 // handling authentication for protected routes
 const passport = require("passport");
@@ -11,6 +12,7 @@ const {
 } = require("../controllers/messages.controller");
 const ensureAuthUserMatchesParam = require("../middlewares/ensureAuthUserMatchesParam");
 
+// POST /users/1/chats/2/messages /////////////////////////////// WORKS
 router.post(
   "/:userid/chats/:chatid/messages",
   passport.authenticate("jwt", { session: false }),
@@ -18,6 +20,7 @@ router.post(
   createMessageController
 );
 
+// DELETE /users/1/chats/2/messages/1 /////////////////////////////// WORKS
 router.delete(
   "/:userid/chats/:chatid/messages/:messageid",
   passport.authenticate("jwt", { session: false }),

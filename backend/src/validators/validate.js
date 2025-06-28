@@ -23,6 +23,7 @@ const validate = (req, res, next) => {
     return next(new ApiError(400, message));
   }
 
+  // passes control to next middleware
   next();
 };
 

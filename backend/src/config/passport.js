@@ -1,3 +1,5 @@
+/* sets up JWT authentication for securing routes and WebSocket connections
+configs my app's authentication strategy using Passport.js middleware */
 // environment variables
 require("dotenv").config();
 // db access layer
@@ -8,7 +10,9 @@ const bcrypt = require("bcryptjs");
 const { Strategy: LocalStrategy } = require("passport-local");
 const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
 
-// loads JWT secret from .env, the secret will sign and verify tokens
+/* server loads JWT secret from .env, JWT secret will sign and verify tokens 
+- ensures tokens haven't been tampered with
+- ensures tokens were issued by the server */
 const SECRET = process.env.JWT_SECRET;
 
 /* Local Strategy for login using username/pw
@@ -16,7 +20,7 @@ initializes Local Strategy which expects a username and pw by default
 done - Passport callback that signals success or failure of authentication */
 const localStrategy = new LocalStrategy(async (username, password, done) => {
   try {
-    /* queries the db, specifically the user model, for a user whoses username
+    /* queries the db, specifically the User model, for a user whoses username
     matches the input */
     const user = await prisma.user.findUnique({ where: { username } });
 
@@ -44,7 +48,10 @@ const jwtStrategy = new JwtStrategy(
     // secret server uses to verify the token's signature
     secretOrKey: SECRET,
   },
-  // callback that runs after the token is decoded and verified
+  /* callback that runs after the token is decoded and verified 
+  JWT - 3 parts: <Header>.<Payload>.<Signature>
+  token payload - JWT's middle part that contains the actual data I want to encode
+  done - cb that signals success (and passes the authenticated user) or failure */
   async (payload, done) => {
     try {
       /* queries the db, the user model for a user with the id embedded in the 
