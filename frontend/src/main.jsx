@@ -1,7 +1,7 @@
 // entry point for my app's JS code
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "./index.css";
+import "./styles/index.css";
 import App from "./App.jsx";
 // basic routing context for simple, declarative routing config
 import { BrowserRouter } from "react-router-dom";

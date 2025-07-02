@@ -18,6 +18,16 @@ const messageRoutes = require("./routes/messages.routes");
 // initializes the Express app
 const app = express();
 
+const cors = require("cors");
+
+app.use(
+  cors({
+    // frontend dev server
+    origin: "http://localhost:5173",
+    // needed if I use cookies or authorization headers
+    credentials: true,
+  })
+);
 /* global middleware that parses incoming JSON request bodies, req.body, 
 during the handling of HTTP requests to my API endpoints- the Express 
 backend can handle the parsed JSON

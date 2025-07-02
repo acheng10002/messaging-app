@@ -37,6 +37,15 @@ async function createMessage(senderId, chatId, content) {
         recipientId,
         chatId,
       },
+      include: {
+        sender: true,
+        recipient: true,
+        chat: {
+          include: {
+            members: true,
+          },
+        },
+      },
     });
 
     // updates chat's lastMessageAt
@@ -70,6 +79,13 @@ async function softDeleteMessageByUser(messageId, userId) {
     return await prisma.message.update({
       where: { id: messageId },
       data: { isDeleted: true },
+      include: {
+        chat: {
+          include: {
+            members: true,
+          },
+        },
+      },
     });
   } catch (err) {
     console.error("Failed to delete message:", err);

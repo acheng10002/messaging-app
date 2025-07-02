@@ -9,6 +9,7 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
   const { setTokenAndUser } = useAuth();
   // isLogin is true if mode is login, false otherwise
   const isLogin = mode === "login";
+  const isNewUser = mode === "new-user";
 
   // initializes state variables for each input
   const [name, setName] = useState("");
@@ -30,6 +31,15 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
     setError(null);
     setErrorList([]);
   }, [mode]);
+
+  if (isNewUser) {
+    return (
+      <div className="form-container">
+        <h2>Welcome</h2>
+        <p>Please register of log in if you have an account.</p>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -104,6 +114,7 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
           <label>
             Name:
             <input
+              className="user-form-input"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -114,6 +125,7 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
           <label>
             Email:
             <input
+              className="user-form-input"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -127,6 +139,7 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
       <label>
         Username:
         <input
+          className="user-form-input"
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
@@ -138,6 +151,7 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
       <label>
         Password:
         <input
+          className="user-form-input"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -151,6 +165,7 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
           <label>
             Confirm Password:
             <input
+              className="user-form-input"
               type="password"
               value={passwordConfirmation}
               onChange={(e) => setPasswordConfirmation(e.target.value)}

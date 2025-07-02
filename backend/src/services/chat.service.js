@@ -115,6 +115,10 @@ async function getChatById(chatId, userId) {
           // includes all non-deleted messages
           where: { isDeleted: false },
           orderBy: { sentAt: "asc" },
+          include: {
+            // includes sender object
+            sender: true,
+          },
         },
       },
     });

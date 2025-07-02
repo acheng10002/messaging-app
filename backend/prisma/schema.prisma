@@ -1,17 +1,13 @@
-// my app's data model and db schema
+/// *
+///    * ORM - tool that lets me interact with a relational db using JS objects
+///    * instead of raw SQL queries
+///    * tells Prisma to generate a client lib I will use to query the db
 generator client {
-  /**
-   * ORM - tool that lets me interact with a relational db using JS objects
-   * instead of raw SQL queries
-   * tells Prisma to generate a client lib I will use to query the db
-   */
   provider = "prisma-client-js"
 }
 
 datasource db {
-  // tells Prisma PostgreSQL is the db engine
   provider = "postgresql"
-  // connection string is stored in an env varible
   url      = env("DATABASE_URL")
 }
 
@@ -24,20 +20,16 @@ model Chat {
 }
 
 model Message {
-  id      Int      @id @default(autoincrement())
-  sentAt  DateTime @default(now())
-  content String
-
-  isDeleted Boolean @default(false)
-
-  sender   User @relation("UserSentMessages", fields: [senderId], references: [id])
-  senderId Int
-
-  recipient   User @relation("UserReceivedMessages", fields: [recipientId], references: [id])
+  id          Int      @id @default(autoincrement())
+  sentAt      DateTime @default(now())
+  content     String
+  isDeleted   Boolean  @default(false)
+  senderId    Int
   recipientId Int
-
-  Chat   Chat @relation(fields: [chatId], references: [id])
-  chatId Int
+  chatId      Int
+  chat        Chat     @relation(fields: [chatId], references: [id])
+  recipient   User     @relation("UserReceivedMessages", fields: [recipientId], references: [id])
+  sender      User     @relation("UserSentMessages", fields: [senderId], references: [id])
 }
 
 model User {
@@ -48,7 +40,7 @@ model User {
   password         String
   isOnline         Boolean   @default(false)
   createdAt        DateTime  @default(now())
-  sentMessages     Message[] @relation("UserSentMessages")
   receivedMessages Message[] @relation("UserReceivedMessages")
+  sentMessages     Message[] @relation("UserSentMessages")
   chats            Chat[]    @relation("ChatMembers")
 }

@@ -10,9 +10,14 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 // sets up WebSocket server using ws library
 const WebSocket = require("ws");
+const { activeConnections } = require("./connections");
 // routes messages
 const { routeWebSocketMessage } = require("./websocket.handlers");
 // does online/offline tracking
+const {
+  handleOnlineUsers,
+  handleOfflineUsers,
+} = require("./handlers/userHandlers");
 const {
   markUserOnline,
   markUserOffline,
@@ -91,11 +96,28 @@ function setupWebSocket(server) {
     /* 1A. confirmation message iding the connected user (previously attached id 
     during WebSocket upgrade with the decoded JWT) */
     console.log(`WebSocket connected for user ${ws.user.id}`);
+
+    /* gets id of authenticated user from WebSocket connection 
+    - ws.user was set during JWT validation in the upgrade phase 
+    - userId gets used as key in the Map */
+    const userId = ws.user.id;
+
+    // ensures the map has an entry for this userId and that that user has active connections
+    if (!activeConnections.has(userId)) {
+      // if not, initializes the userId value with a new empty Set
+      activeConnections.set(userId, new Set());
+    }
+    /* fetches the Set for the userId, and registers this specific WebSocket connection
+    into that set */
+    activeConnections.get(userId).add(ws);
+
     /* lifecycleHandler function gets called by the server
     - "connection" events fires on the server 
     - websocket.js has access to each user's ws.user.id, 
     - only the server can update the db to mark users online */
     markUserOnline(ws);
+    handleOnlineUsers(ws);
+    handleOfflineUsers(ws);
 
     /* sets up an event listener on the individual WebSocket connection
     - listens for message events, i.e. when the client sends a message 
@@ -124,11 +146,22 @@ function setupWebSocket(server) {
     // this event fires when connection gets closed from client
     ws.on("close", () => {
       console.log(`WebSocket disconnected for user ${ws.user.id}`);
+
+      const userConns = activeConnections.get(userId);
+      if (userConns) {
+        userConns.delete(ws);
+        if (userConns.size === 0) {
+          activeConnections.delete(userId);
+        }
+      }
+
       /* lifecycleHandler function gets called by the server
       - server-side cleanup
       - websocket.js has access to each user's ws.user.id, 
       - only the server can update the db to mark users offline */
       markUserOffline(ws);
+      handleOnlineUsers(ws);
+      handleOfflineUsers(ws);
     });
 
     // this event fires and captures any socket-level errors
@@ -137,11 +170,12 @@ function setupWebSocket(server) {
     });
 
     /* ws.send(...) outside handlers - emitting (push)
-    2A. server sends initial welcome message right after connection is established */
+    2A. server sends initial welcome message right after connection is established 
     ws.send(
       JSON.stringify({ type: "welcome", message: `Hello user ${ws.user.id}` })
     );
+    */
   });
 }
 
-module.exports = { setupWebSocket };
+module.exports = { activeConnections, setupWebSocket };

@@ -4,13 +4,13 @@ import Sidebar from "../components/Sidebar";
 
 const MainLayout = () => {
   return (
-    <>
+    <div className="main-layout">
       <Header />
       <div className="layout">
         <Sidebar />
         <Outlet />
       </div>
-    </>
+    </div>
   );
 };
 

@@ -24,31 +24,36 @@ const Header = () => {
 
   return (
     <header className="header">
+      {/* left-aligned user label */}
+      <div className="header-left">
+        {/* if user is logged in, button says logout
+        - onLogout handles logout */}
+        {user && !hideButtons && <span>{user.username}</span>}
+      </div>
       {/* header title always shown */}
       <h1 className="header-title">Messaging App</h1>
-      {/* only renders buttons if hideButtons is false */}
-      {!hideButtons &&
-        {
-          /* if user is logged in, button says logout
-        - onLogout handles logout */
-        }(
-          user ? (
-            <>
-              <span>{user.username}</span>
-              <button onClick={handleLogout}>Logout</button>
-            </>
+      {/* right-aligned buttons */}
+      <div className="header-buttons">
+        {!hideButtons &&
+          (user ? (
+            <button className="other-button" onClick={handleLogout}>
+              Logout
+            </button>
           ) : (
-            // otherwise, user is not logged in, show login/register buttons
             <>
-              {/* sends user to "/users/register" */}
               <button onClick={() => navigate("/users/register")}>
                 Register
               </button>
               {/* sends user to "/auth/login" */}
-              <button onClick={() => navigate("/auth/login")}>Login</button>
+              <button
+                className="other-button"
+                onClick={() => navigate("/auth/login")}
+              >
+                Login
+              </button>
             </>
-          )
-        )}
+          ))}
+      </div>
     </header>
   );
 };

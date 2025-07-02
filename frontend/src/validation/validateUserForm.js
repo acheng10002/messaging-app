@@ -14,17 +14,9 @@ export const validateUserForm = ({
     errors.push("Username is required.");
   }
 
-  if (email !== undefined) {
-    if (!email.trim()) {
-      errors.push("Email is required.");
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.push("Invalid email format.");
-    }
-  }
-
   if (!password) {
     errors.push("Password is required.");
-  } else {
+  } else if (!isLogin) {
     if (password.length < 8) {
       errors.push("Password must be at least 8 characters.");
     }
@@ -46,6 +38,13 @@ export const validateUserForm = ({
     if (!name.trim()) {
       errors.push("Name is required.");
     }
+
+    if (!email.trim()) {
+      errors.push("Email is required.");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.push("Invalid email format.");
+    }
+
     if (password !== passwordConfirmation) {
       errors.push("Passwords do not match.");
     }
