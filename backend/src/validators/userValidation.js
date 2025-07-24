@@ -1,11 +1,13 @@
-/* gets all validators errors
-backend validation that enforces same rules as the client-side
-imports body function from middleware for validating and sanitizing request data in Express.js */
+/* gets all validators errors for registration
+- backend validation that enforces same rules as the client-side
+- imports body function from middleware for validating and sanitizing request data in Express.js */
 const { body } = require("express-validator");
 
 /* defines what to validate and how to validate it 
 REGISTER FIELDS GETS SANITIZED AND VALIDATED WITH A CUSTOM VALIDATOR FOR THE 
-CONFIRMPASSWORD FIELD */
+CONFIRMPASSWORD FIELD 
+H4. REGISTERS USER - UserForm.jsx, AuthContext.jsx, users.routes.js, userValidation.js, validate.js, users.controller.js, user.service.js, UserForm.jsx 
+- validates and sanitizes all fields */
 const userValidationRules = [
   // validates and sanitizes Name
   body("name")

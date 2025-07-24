@@ -1,5 +1,4 @@
 /* simulates a WebSocket client, like a browser, for testing 
-- 1. sends client messages of shape { type, ...data }
 - receives server responses over the same socket
 - ex. sends { type: "ping" } and logs the response
 ws library for a WebSocket implementation for Node.js 
@@ -11,30 +10,16 @@ copy token from login response, paste here */
 const token =
   "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzUwNzkyMTkyLCJleHAiOjE3NTA3OTU3OTJ9.tuqyWAvg-FO-vTK54u4kKJD2BAOA9Rjsa4-LIDrB4do";
 
-/* I. CLIENT INITIATES CONNECTION
-creates a new authenticated WebSocket connection to my backend server using JWT 
-(begins a TCP handshake and HTTP upgrade request to the server)
-- token is appended as a query parameter in the connection URL 
-- token will be parsed and validated in my server's upgrade handler 
+/* - token is appended as a query parameter in the connection URL 
 - simulates a real client without a frontend */
 const ws = new WebSocket(
   `ws://localhost:3000?token=${encodeURIComponent(token)}`
 );
 
-/* IV. CONNECTION IS ACCEPTED AND ESTABLISHED,
-WebSocket event: connection opened
-runs when WebSocket connection is successfully opened */
+// runs when WebSocket connection is successfully opened
 ws.on("open", () => {
   /* 1B. client logs a confirmation to the terminal */
   console.log("WebSocket connected");
-
-  /* 3A. Ping test - confirms connection is alive
-  - "ping" client request/message type
-  - sent to websocket.js 
-  - routed to websocket.handlers.js/routeWebSocketMessage 
-  - handled by handlePing in chatHandlers.js 
-  - "pong" server response/message type */
-  ws.send(JSON.stringify({ type: "ping" }));
 
   /* 4A. attempts to find or create a chat with recipientId = 2 
   - returns the found or newly created chat

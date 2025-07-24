@@ -7,12 +7,15 @@ const { register } = require("../services/user.service");
 // custom error
 const ApiError = require("../utils/ApiError");
 
-/* POST /users/
-public, registers a new user */
+/* POST /users/ 
+- public, registers a new user 
+H6. REGISTERS USER - UserForm.jsx, AuthContext.jsx, users.routes.js, userValidation.js, validate.js, users.controller.js, user.service.js, UserForm.jsx 
+- handles business logic */
 const registerController = async (req, res, next) => {
   // destructures fields from request body
   const { name, username, email, password, passwordConfirmation } = req.body;
 
+  // verifies pw matches confirmation
   if (password !== passwordConfirmation) {
     throw new ApiError(400, "Passwords do not match");
   }
@@ -21,7 +24,7 @@ const registerController = async (req, res, next) => {
   try {
     // registers the new user with service function
     await register(name, username, email, hash);
-    // redirects to login on success
+    // on success, sends HTTP 201, success message, and redirects to login
     res.status(201).json({
       message: "Registration successful. Please log in.",
       redirectTo: "/auth/login",

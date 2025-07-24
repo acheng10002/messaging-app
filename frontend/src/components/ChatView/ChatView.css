@@ -1,0 +1,82 @@
+.header {
+  font-size: 1.2rem;
+  background-color: white;
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.chatview-messages {
+  flex: 1;
+  display: flex;
+  gap: 0.5rem;
+  flex-direction: column;
+  max-height: 75vh;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.own-message {
+  align-self: flex-end;
+  text-align: right;
+}
+
+.other-message {
+  align-self: flex-start;
+  text-align: left;
+}
+
+.chatview-message {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  max-width: 70%;
+  font-size: 0.8rem;
+  word-wrap: break-word;
+  background-color: #eef1f5;
+  padding: 0.5rem 0.25rem 0.5rem 0.5rem;
+  border-radius: 6px;
+}
+
+.delete-button {
+  align-self: flex-end;
+  font-weight: bold;
+  color: #444;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  color: #b00020;
+}
+
+.chatview-input {
+  display: flex;
+  flex-direction: column;
+  max-height: 25vh;
+  background-color: #fff;
+  padding: 1rem;
+  border-top: 1px solid #ccc;
+}
+
+.message-textarea {
+  flex: 1;
+  font-size: 0.8rem;
+}
+
+.chatview-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
+.chatview-buttons button {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+}
+
+.back-button {
+  margin-left: 1rem;
+}

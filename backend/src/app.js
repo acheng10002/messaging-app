@@ -12,8 +12,7 @@ const { localStrategy, jwtStrategy } = require("./config/passport");
 // three routers/inline middleware applied in route definitions below
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/users.routes");
-const chatRoutes = require("./routes/chats.routes");
-const messageRoutes = require("./routes/messages.routes");
+const chatbotRoutes = require("./routes/chatbot.routes");
 
 // initializes the Express app
 const app = express();
@@ -69,8 +68,7 @@ app.get("/", (req, res) => {
   even if the URL path is the same */
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
-app.use("/users", chatRoutes);
-app.use("/users", messageRoutes);
+app.use("/chatbot", chatbotRoutes);
 
 module.exports = app;
 

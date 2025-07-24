@@ -1,0 +1,24 @@
+/* sidebar for navigation and online/offline users view */
+.sidebar {
+  overflow-y: auto;
+  width: 250px;
+  min-width: 250px;
+  padding: 1rem;
+  border-right: 1px solid #ccc;
+}
+
+h4 {
+  margin-top: 0;
+}
+
+.user {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+button {
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+}

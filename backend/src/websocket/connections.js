@@ -1,7 +1,6 @@
-/* set of WebSocket connections 
+/* Map() object of sets of WebSocket connections 
 maps a logged-in user's id to a Set of WebSocket instances
-- Map enables efficient lookup by userId
-- Set is the multiple active WebSocket connections each user has, Set prevents duplicates */
+- Map enables efficient lookup by userId */
 const activeConnections = new Map();
 
 module.exports = { activeConnections };

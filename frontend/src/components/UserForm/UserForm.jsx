@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 // custom function to run client-side validation on the form data
-import { validateUserForm } from "../validation/validateUserForm";
-import { useAuth } from "../hooks/useAuth";
+import { validateUserForm } from "../../validation/validateUserForm";
+import { useAuth } from "../../hooks/useAuth";
+import "./UserForm.css";
 
 // mode prop determines whether this is a login or register form
 const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
   // retrieves updater function for token and user
-  const { setTokenAndUser } = useAuth();
+  const { register, login } = useAuth();
   // isLogin is true if mode is login, false otherwise
   const isLogin = mode === "login";
   const isNewUser = mode === "new-user";
@@ -32,15 +33,22 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
     setErrorList([]);
   }, [mode]);
 
+  /* J8. LOGS OUT USER - Header.jsx, useHandleLogout.js, AuthContext.jsx, auth.routes.js, passport.js, auth.routes.js, auth.controller.js, auth.service.js, UUserForm.jsx 
+     user gets navigate to root after logging out */
   if (isNewUser) {
     return (
       <div className="form-container">
         <h2>Welcome</h2>
-        <p>Please register of log in if you have an account.</p>
+        <p>Please register or log in if you have an account.</p>
       </div>
     );
   }
-
+  /* H1. REGISTERS USER - UserForm.jsx, AuthContext.jsx, users.routes.js, userValidation.js, validate.js, users.controller.js, user.service.js, auth.service.js, UUserForm.jsx 
+  - handleSubmit validates input on the client
+  I1. LOGS IN USER - UserForm.jsx, AuthContext.jsx, auth.routes.js, passport.js, auth.controller.js, UserForm.jsx 
+  - handleSubmit sends a POST request to /auth/login via fetch
+    header is "Content-Type": "application/json"
+    payload is new URLSearchParams({ username, password }) */
   const handleSubmit = async (e) => {
     e.preventDefault();
     // resets any previous error state
@@ -61,40 +69,29 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
     }
 
     try {
-      // API call that chooses the correct endpoint based on the mode
-      const endpoint = isLogin
-        ? `${import.meta.env.VITE_API_BASE_URL}/auth/login`
-        : `${import.meta.env.VITE_API_BASE_URL}/users/register`;
-      // creates the request payload
-      const payload = isLogin
-        ? // uses application/x-www-form-urlencoded if the mode is login
-          new URLSearchParams({ username, password })
-        : // uses a JSON string if the mode is register
-          JSON.stringify({ name, username, password, passwordConfirmation });
-
-      // sends the request to the backend with appropriate headers and body
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": isLogin
-            ? "application/x-www-form-urlencoded"
-            : "application/json",
-        },
-        body: payload,
-      });
-
-      // if the response isn/t ok, throws an error with the response text
-      if (!res.ok) throw new Error(await res.text());
-
-      // on success, parses the JSON response
-      const data = await res.json();
-
-      if (isLogin) {
-        setTokenAndUser(data.token, data.user);
-        onLoginSuccess(data.user);
-      } else {
-        // navigate("/auth/login");
+      if (!isLogin) {
+        /* H8. REGISTERS USER - UserForm.jsx, AuthContext.jsx, users.routes.js, userValidation.js, validate.js, user.controller.js, users.service.js, UserForm.jsx 
+        - client handles server response, calls onRegisterSuccess()
+        - defined in App.js, navigate("/auth/login"); */
+        await register({
+          name,
+          username,
+          email,
+          password,
+          passwordConfirmation,
+        });
         onRegisterSuccess();
+      } else {
+        /* I7. LOGS IN USER - UserForm.jsx, AuthContext.jsx, auth.routes.js, passport.js, auth.controller.js, UserForm.jsx 
+        - client receives JWT and stores it
+        - on login success, calls setTokenAndUser from useAuth and navigates to /users/:id/chats
+        - uses login() from useAuth() */
+        const result = await login(username, password);
+        if (!result || !result.user) {
+          setError("Login failed");
+          return;
+        }
+        onLoginSuccess(result.user);
       }
     } catch (err) {
       // catches network or server errors
@@ -111,8 +108,8 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
       {/* if in registration mode, shows a field for the user's name */}
       {!isLogin && (
         <>
-          <label>
-            Name:
+          <div className="form-group">
+            <label>Name:</label>
             <input
               className="user-form-input"
               type="text"
@@ -120,10 +117,9 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
               onChange={(e) => setName(e.target.value)}
               required
             />
-          </label>
-          <br />
-          <label>
-            Email:
+          </div>
+          <div className="form-group">
+            <label>Email:</label>
             <input
               className="user-form-input"
               type="email"
@@ -131,13 +127,12 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-          </label>
-          <br />
+          </div>
         </>
       )}
       {/* username and password are common to both login and register forms */}
-      <label>
-        Username:
+      <div className="form-group">
+        <label>Username:</label>
         <input
           className="user-form-input"
           type="text"
@@ -145,11 +140,9 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
           onChange={(e) => setUsername(e.target.value)}
           required
         />
-      </label>
-      <br />
-
-      <label>
-        Password:
+      </div>
+      <div className="form-group">
+        <label>Password:</label>
         <input
           className="user-form-input"
           type="password"
@@ -157,13 +150,12 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-      </label>
-      <br />
+      </div>
       {/* if in registration mode, shows a field to confirm password */}
       {!isLogin && (
         <>
-          <label>
-            Confirm Password:
+          <div className="form-group">
+            <label>Confirm Password:</label>
             <input
               className="user-form-input"
               type="password"
@@ -171,8 +163,7 @@ const UserForm = ({ mode, onRegisterSuccess, onLoginSuccess }) => {
               onChange={(e) => setPasswordConfirmation(e.target.value)}
               required
             />
-          </label>
-          <br />
+          </div>
         </>
       )}
       {/* if multiple validation errors, renders them as a list */}

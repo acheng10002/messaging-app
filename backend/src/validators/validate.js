@@ -4,7 +4,9 @@ const { validationResult } = require("express-validator");
 const ApiError = require("../utils/ApiError");
 
 /* gets run after userValidationRules 
-executes the validator logic and handles validation errors */
+executes the validator logic and handles validation errors 
+H5. REGISTERS USER - UserForm.jsx, AuthContext.jsx, users.routes.js, userValidation.js, validate.js, users.controller.js, user.service.js, UserForm.jsx 
+- checks for validation failures or short-circuits and returns an HTTP 400 with errors if there are */
 const validate = (req, res, next) => {
   /* retrieves result of userValidationRules, returns a Result object which
   contains validation errors if they exist */

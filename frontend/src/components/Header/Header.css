@@ -1,0 +1,41 @@
+.header {
+  display: flex;
+  /* will align logged in user's username to the left and buttons to the right */
+  justify-content: space-between;
+  /* contents vertically aligned in the center */
+  align-items: center;
+  background-color: #fff;
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.left {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.title {
+  flex: 1;
+  font-size: 2rem;
+  text-align: center;
+  margin: 0;
+}
+
+.buttons {
+  flex: 1;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  align-self: center;
+}
+
+.header button {
+  align-self: center;
+  font-size: 0.9rem;
+}
+
+h1 {
+  line-height: 1.2;
+  padding: 0;
+}

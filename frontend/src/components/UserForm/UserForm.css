@@ -1,0 +1,33 @@
+h2 {
+  align-self: center;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+label {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.user-form-input {
+  height: 17px;
+  width: 240px;
+  font-size: 1rem;
+  padding: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.error {
+  width: 240px;
+}
+
+.form-container button {
+  align-self: center;
+  font-size: 0.9rem;
+}

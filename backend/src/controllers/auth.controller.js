@@ -8,6 +8,11 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 // service functions run after user logs in/logs out
 const { setUserOnline, setUserOffline } = require("../services/auth.service");
+const { activeConnections } = require("../websocket/connections");
+const {
+  handleOnlineUsers,
+  handleOfflineUsers,
+} = require("../websocket/handlers/userHandlers");
 // custom error
 const ApiError = require("../utils/ApiError");
 
@@ -15,12 +20,20 @@ const ApiError = require("../utils/ApiError");
 const SECRET = process.env.JWT_SECRET;
 
 /* POST /auth/login
-public, logs in user with jsonwebtoken creates the JWT */
+- public, logs in user with jsonwebtoken creates the JWT 
+I5. LOGS IN USER - UserForm.jsx, AuthContext.jsx, auth.routes.js, passport.js, auth.routes.js, auth.controller.js, auth.service.js, UserForm.jsx 
+- controller handles successful login */
 const login = async (req, res, next) => {
   try {
     /* if authentication fails, Passport handles response automatically 
-    callback only runs if authentication succeeds - req.user is the authenticated user */
+    - callback only runs if authentication succeeds - req.user is the authenticated user 
+    - updates db status, isOnline: true */
     await setUserOnline(req.user.id);
+
+    // broadcasts updated user presence after DB mutation
+    handleOnlineUsers();
+    handleOfflineUsers();
+
     /* if authenticaion succeeds, server issues a JWT using jsonwebtoken
     payload - { id: req.user.id } get encoded into the token
     secret - server secret used in the signature
@@ -44,10 +57,31 @@ const login = async (req, res, next) => {
 };
 
 /* POST /auth/logout
-protected, logs out user and makes them offline in db */
+- protected, logs out user and makes them offline in db 
+J6. LOGS OUT USER - Header.jsx, useHandleLogout.js, AuthContext.jsx, auth.routes.js, passport.js, auth.routes.js, auth.controller.js, auth.service.js, UserForm.jsx  
+- logs out user on the server-side */
 const logout = async (req, res, next) => {
   try {
+    const userId = req.user.id;
+
+    // updates db status
     await setUserOffline(req.user.id);
+
+    // closes all active WebSocket connections for the user
+    const userSockets = activeConnections.get(userId);
+    if (userSockets) {
+      userSockets.forEach((ws) => ws.close());
+    }
+    /*
+    // waits a short delay to ensure `ws.on("close")` has removed the user from `activeConnections`
+    setTimeout(() => {
+      // broadcasts updated online list
+      handleOnlineUsers();
+      // broadcasts updated offline list
+      handleOfflineUsers();
+    }, 100);
+    */
+
     res.json({
       message: "Logged out successfully: client should discard token",
     });
@@ -62,8 +96,7 @@ const logout = async (req, res, next) => {
 localStorage - persistent storage in browser, stays unless explicitly cleared
 cookies - client storage that can be persistent, common for session-based authentication
 Cache Storage API - persistent storage, stores HTTP responses and enables offline access 
-                    and caching of assets and API responses
-*/
+                    and caching of assets and API responses */
 module.exports = {
   login,
   logout,

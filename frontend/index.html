@@ -1,4 +1,4 @@
-<!-- single HTML entry point for my app
+<!-- single HTML entry point for my app that tells Vite to inject it here
  1. it's the root mount point for React, where my React component tree is rendered
  2. it's the static shell of my app
  3. it's the entry file for Vite to generate the final HTML during prod builds
@@ -13,6 +13,7 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- JS bundle gets injected here -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

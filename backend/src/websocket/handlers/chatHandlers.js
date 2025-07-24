@@ -1,5 +1,6 @@
 /* implements WebSocket-specific logic for chats
 - handles sending messages
+- handles deleting messages
 - handles retrieving a chat
 - handles getting chats list
 - handles finding/creating a chat 
@@ -15,36 +16,123 @@ const {
   findOrCreateChat,
 } = require("../../services/chat.service");
 
+// imports the Map from the central WebSocket connection manager module
 const { activeConnections } = require("../connections");
 
+/* will broadcast an operation to all members of a chat
+- chatMembers - array of user objects who are part of a chat
+- payload - a serialized object to be sent to each member
+  ("serialized" - object can be passed to JSON.stringify(obj) 
+  without throwing an error)
+*/
 function broadcastToChatMembers(chatMembers, payload) {
+  // iterates over each member in the chatMembers array
   chatMembers.forEach((member) => {
+    // retrieves the Set of live WebSocket connections for this user's id
     const conns = activeConnections.get(member.id);
+    // if there are active WebSocket connections for this user
     if (conns) {
+      // iterates over each of the connections
       conns.forEach((ws) => {
+        // sends the payload to the client over WebSocket after serializing it to JSON
         ws.send(JSON.stringify(payload));
       });
     }
   });
 }
 
-async function handlePing(ws) {
-  // 3E. Received (from server): {"type":"pong","message":"Alive"}
-  ws.send(JSON.stringify({ type: "pong", message: "Alive" }));
+/* A7. GETS USER CHATS - AuthContext.js, auth.routes.js, passport.js, auth.routes.js, WebSocketContext.jsx, websocket.js, PageContext.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatsPanel.jsx 
+- backend message handler gets user chats
+- user sees all chats, newest message in all chats, and lastMessageAt for all chats */
+async function handleGetUserChats(ws) {
+  try {
+    //  accesses all of the logged-in user's chats from db via getUserChats service function, returns all the user's chats
+    const chats = await getUserChats(ws.user.id);
+    /* - on mount, client user automatically sees their chats / client's "get_user_chats" message
+    - server routes the client's message to the correct handler / server's routeWebSocketMessage(ws, parsed)
+    - server handler here gets all the chats via a service function / server's getUserChats(ws.user.id)
+    - server sends "chats_list" message and chats object data to the client / below  
+    - sender client updates its state when all their chats are retrieved */
+    ws.send(JSON.stringify({ type: "chats_list", data: chats }));
+  } catch (err) {
+    // sends error message back to client who initiated request for all chats with relevant error message
+    ws.send(JSON.stringify({ type: "error", message: err.message }));
+  }
 }
 
-/* user creates a new message in a chat 
-SENDS A MESSAGE
-2. Server processes the message and responds */
+/* B7. GETS SELECTED CHAT - AuthContext.js, auth.routes.js, passport.js, auth.routes.js, WebSocketContext.jsx, websocket.js, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx
+- backend message handler for WebSocket message requesting a specific chat */
+async function handleGetChat(ws, parsed) {
+  try {
+    /* accesses the chat from db via getChatByUd service function, returns the full chat 
+    parsed.chatId - relevant chat's id
+    ws.user.id - logged-in user's id */
+    const chat = await getChatById(parsed.chatId, ws.user.id);
+    /* - client user clicks view full chat button / client's "get_chat" message
+    - server routes the client's message to the correct handler / server's routeWebSocketMessage(ws, parsed)
+    - server handler here gets the chat via a service function / server's getChatById(parsed.chatId, ws.user.id)
+    - server sends "chat_history" message and chat object data to the client / below  
+    - sender client updates its state when the full chat is retrieved */
+    ws.send(JSON.stringify({ type: "chat_history", data: chat }));
+  } catch (err) {
+    // sends error message back to client who initiated request for specific chat with relevant error message
+    ws.send(JSON.stringify({ type: "error", message: err.message }));
+  }
+}
+
+/* C7. FINDS OR CREATES A CHAT - AuthContext.js, auth.routes.js, passport.js, auth.routes.js, WebSocketContext.jsx, websocket.js, Sidebar.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx
+K9. CHAT WITH CHATBOT - ensureChatbotUser.js, AuthContext.js, auth.routes.js, passport.js, auth.routes.js, Sidebar.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, message.service.js, PageContext.jsx, ChatView.jsx, chatbot.routes.js, chatbot.controller.js, message.service.js, PageContext.jsx, ChatView.jsx
+- handleFindOrCreateChat calls backend service layer which returns selected or created chat object
+- user initializes or re-opens a conversation */
+async function handleFindOrCreateChat(ws, parsed) {
+  // extracts recipientId from the parsed WebSocket message
+  const { recipientId } = parsed;
+  if (!recipientId) {
+    // if recipientId is null or undefined, send error response back and exists function early
+    ws.send(JSON.stringify({ type: "error", message: "Missing recipientId" }));
+    return;
+  }
+  try {
+    //  gets the chat object between the logged-in user and user with recipientId via findOrCreateChat service function
+    const chat = await findOrCreateChat(ws.user.id, recipientId);
+
+    /* K10. CHAT WITH CHATBOT - server message handler broadcasts data to chat members and sends a "chat_ready" 
+    message to the frontend
+    - client user clicks sidebar button to start or resume a chat / client's "find_or_create_chat" message
+    - server routes the client's message to the correct handler / server's routeWebSocketMessage(ws, parsed)
+    - server handler here finds or creates the chat via a service function / server's handleFindOrCreateChat(ws, parsed) 
+    - server sends "chat_ready" message and chat object data to the client / below 
+    - sender client updates its state when the chat is created or resumed */
+    ws.send(JSON.stringify({ type: "chat_ready", data: chat }));
+  } catch (err) {
+    // if error occurs during chat creation or lookup, error message sent back to requester
+    ws.send(JSON.stringify({ type: "error", message: err.message }));
+  }
+}
+
+/* D7. CREATES A MESSAGE - AuthContext.js, auth.routes.js, passport.js, auth.routes.js, WebSocketContext.jsx, websocket.js, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, message.service.js, PageContext.jsx, ChatView.jsx
+K17. CHAT WITH CHATBOT - ensureChatbotUser.js, AuthContext.js, auth.routes.js, passport.js, auth.routes.js, Sidebar.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx, chatbot.routes.js, chatbot.controller.js, chat.service.js, PageContext.jsx, ChatView.jsx
+- backend message handler saves the message and broadcasts the new message to all chat participiants via their WebSocket connections  
+ws - specific client's websocket connection
+parsed - incoming client message parsed into JSON object */
 async function handleChat(ws, parsed) {
   try {
+    console.log("handleChat invoked with data:", parsed);
+    // persists the message to db via createMessage service function returns the full message
     const message = await createMessage(
+      // sender's user id (attached to the WebSocket during auth)
       ws.user.id,
+      // chat id of chat receiving the message
       parsed.chatId,
+      // actual message text
       parsed.content
     );
 
+    console.log("Message created in DB:", message);
+
+    // ensures saved message is linked to a valid chat object and that chat includes member info
     if (!message.chat || !message.chat.members) {
+      // if chat or chat members are missing, returns an error directly to the sender and exits early
       return ws.send(
         JSON.stringify({
           type: "error",
@@ -53,107 +141,64 @@ async function handleChat(ws, parsed) {
       );
     }
 
-    // broadcasts the new message to all chat members including the sender
+    console.log(
+      "Broadcasting new_message to chat members:",
+      message.chat.members.map((m) => m.id)
+    );
+
+    /* - client user sends a new message / client's "new_message" message
+    - server routes the client's message to the correct handler / server's routeWebSocketMessage(ws, parsed)
+    - server handler here creates the message via a service function / server's createMessage(ws.user.id, parsed.chatId, parsed.content)
+    - server sends "new_message" message and message object data to all chat members / below  
+    - sender client updates its state when the message is posted 
+    - looks up each member's WebSocket connections and pushes the message to each socket */
     broadcastToChatMembers(message.chat.members, {
       type: "new_message",
       data: message,
     });
-    /* handleChat sends back to the client something like this:
-    6E. Received (from server): {"type":"chat","data":{"id":4,"sentAt":"2025-06-24T19:38:31.281Z",
-    "content":"Hello from client!","isDeleted":false,"senderId":1,"recipientId":2,"chatId":2}} */
   } catch (err) {
     ws.send(JSON.stringify({ type: "error", message: err.message }));
   }
 }
 
-// user navigates to an existing chat
-async function handleGetChat(ws, parsed) {
-  try {
-    const chat = await getChatById(parsed.chatId, ws.user.id);
-    // 7E. Received (from server): {"type":"chat_history","data":{"id":2,"createdAt":"2025-06-23T16:11:12.837Z",
-    // "lastMessageAt":"2025-06-24T19:38:31.281Z","members":[{"id":1,"name":"Alice","username":"alice123",
-    // "email":"alice@example.com","password":"$2b$10$8H9lkNI/Dezni2euj8Q3Lu9bURR8e/YthUJaOmNgEDGvxptGkBirG",
-    // "isOnline":true,"createdAt":"2025-06-23T15:59:52.824Z"},{"id":2,"name":"Bob","username":"bob",
-    // "email":"bob@example.com","password":"$2b$10$mIH51D85vZIm0CFRuCQzS.iFCJaMxkHq2S70wrNo0ZvTulBry3zTK",
-    // "isOnline":false,"createdAt":"2025-06-23T16:08:43.889Z"}],"messages":[{"id":2,
-    // "sentAt":"2025-06-23T16:41:02.966Z","content":"Hi again!","isDeleted":false,"senderId":1,"recipientId":2,
-    // "chatId":2},{"id":3,"sentAt":"2025-06-24T19:11:00.804Z","content":"Hello from client!","isDeleted":false,
-    // "senderId":1,"recipientId":2,"chatId":2},{"id":4,"sentAt":"2025-06-24T19:38:31.281Z",
-    // "content":"Hello from client!","isDeleted":false,"senderId":1,"recipientId":2,"chatId":2}]}}
-    ws.send(JSON.stringify({ type: "chat_history", data: chat }));
-  } catch (err) {
-    ws.send(JSON.stringify({ type: "error", message: err.message }));
-  }
-}
-
+/* E7. DELETES A MESSAGE - AuthContext.js, auth.routes.js, passport.js, auth.routes.js, WebSocketContext.jsx, websocket.js, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, message.service.js, PageContext.jsx, ChatView.jsx
+- backend message handler soft deletes the message and broadcasts the soft deletion to all chat participants */
 async function handleDeleteMessage(ws, parsed) {
+  // destructures messageId from client's message payload
   const { messageId } = parsed;
   if (!messageId) {
+    // if messageId is missing, sends an error response to the client and exits function early
     return ws.send(
       JSON.stringify({ type: "error", message: "Missing messageId" })
     );
   }
 
   try {
+    /* soft deletes the message in the db via softDeleteMessageByUser service function 
+    service function verifies permissions and updates the isDeleted flag */
     const deletedMessage = await softDeleteMessageByUser(messageId, ws.user.id);
 
+    // checks that the chat associated with the deleted message exists and has members
     if (deletedMessage.chat?.members) {
+      /* - client user sends a new message / client's "delete_message" message
+      - server routes the client's message to the correct handler / server's routeWebSocketMessage(ws, parsed)
+      - server handler here soft deletes the message via a service function / server's createMessage(ws.user.id, parsed.chatId, parsed.content)
+      - server sends "delete_message" message and id of the deleted message to all chat members / below  
+      - sender client updates its state when the message is deleted
+      sends a WebSocket message to all members of the chat, informing them the message has been deleted */
       broadcastToChatMembers(deletedMessage.chat.members, {
         type: "delete_message",
         data: { id: deletedMessage.id },
       });
     }
   } catch (err) {
-    ws.send(JSON.stringify({ type: "error", message: err.message }));
-  }
-}
-
-// user sees all chats, newest message in all chats, and lastMessageAt for all chats
-async function handleGetUserChats(ws) {
-  try {
-    const chats = await getUserChats(ws.user.id);
-    // 5E. Received (from server): {"type":"chats:list","data":[{"id":2,"createdAt":"2025-06-23T16:11:12.837Z",
-    // "lastMessageAt":"2025-06-24T19:11:00.804Z","members":[{"id":1,"name":"Alice","username":"alice123",
-    // "email":"alice@example.com","password":"$2b$10$8H9lkNI/Dezni2euj8Q3Lu9bURR8e/YthUJaOmNgEDGvxptGkBirG",
-    // "isOnline":true,"createdAt":"2025-06-23T15:59:52.824Z"},{"id":2,"name":"Bob","username":"bob",
-    // "email":"bob@example.com","password":"$2b$10$mIH51D85vZIm0CFRuCQzS.iFCJaMxkHq2S70wrNo0ZvTulBry3zTK",
-    // "isOnline":false,"createdAt":"2025-06-23T16:08:43.889Z"}],"messages":[{"id":3,
-    // "sentAt":"2025-06-24T19:11:00.804Z","content":"Hello from client!","isDeleted":false,"senderId":1,
-    // "recipientId":2,"chatId":2}]}]}
-    ws.send(JSON.stringify({ type: "chats_list", data: chats }));
-  } catch (err) {
-    ws.send(JSON.stringify({ type: "error", message: err.message }));
-  }
-}
-
-// user initializes or re-opens a conversation
-async function handleFindOrCreateChat(ws, parsed) {
-  const { recipientId } = parsed;
-  if (!recipientId) {
-    ws.send(JSON.stringify({ type: "error", message: "Missing recipientId" }));
-    return;
-  }
-  try {
-    const chat = await findOrCreateChat(ws.user.id, recipientId);
-    broadcastToChatMembers(chat.members, {
-      type: "chat_ready",
-      chat: chat,
-    });
-    // 4E. Received (from server): {"type":"chat:ready","data":{"id":2,"createdAt":"2025-06-23T16:11:12.837Z",
-    // "lastMessageAt":"2025-06-23T16:49:47.970Z","members":[{"id":1,"name":"Alice",
-    // "username":"alice123","email":"alice@example.com","password":
-    // "$2b$10$8H9lkNI/Dezni2euj8Q3Lu9bURR8e/YthUJaOmNgEDGvxptGkBirG","isOnline":true,
-    // "createdAt":"2025-06-23T15:59:52.824Z"},{"id":2,"name":"Bob","username":"bob",
-    // "email":"bob@example.com","password":"$2b$10$mIH51D85vZIm0CFRuCQzS.iFCJaMxkHq2S70wrNo0ZvTulBry3zTK",
-    // "isOnline":false,"createdAt":"2025-06-23T16:08:43.889Z"}]}}
-    ws.send(JSON.stringify({ type: "chat_ready", data: chat }));
-  } catch (err) {
+    // sends error message back to client who initiated delete with relevant error message
     ws.send(JSON.stringify({ type: "error", message: err.message }));
   }
 }
 
 module.exports = {
-  handlePing,
+  broadcastToChatMembers,
   handleChat,
   handleGetChat,
   handleDeleteMessage,

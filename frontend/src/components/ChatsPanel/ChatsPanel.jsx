@@ -1,14 +1,25 @@
 import { useNavigate } from "react-router-dom";
-import { usePageContext } from "../contexts/PageContext";
+import { usePageContext } from "../../contexts/PageContext";
 // custom hook to access logged-in user info
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
+import "./ChatsPanel.css";
 
 const ChatsPanel = ({}) => {
   const navigate = useNavigate();
-  // fetches chats from context
+  /* fetches chats from context 
+  GETS USER CHATS - AuthContext.js, auth.routes.js, passport.js, WebSocketContext.jsx, websocket.js, PageContext.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatsPanel.jsx 
+  A10. UI update, ChatsPanel sees chats change */
   const { chats } = usePageContext();
   // for current user ID
   const { user } = useAuth();
+
+  if (!user || !chats)
+    return (
+      <div className="form-container">
+        <h2>Welcome</h2>
+        <p>Please register or log in if you have an account.</p>
+      </div>
+    );
 
   return (
     <div className="main-chat">

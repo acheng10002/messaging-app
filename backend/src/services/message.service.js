@@ -6,6 +6,9 @@ const { updateLastMessageAt } = require("./chat.service");
 // custom error
 const ApiError = require("../utils/ApiError");
 
+/* CREATES A MESSAGE - AuthContext.js, auth.routes.js, passport.js, auth.routes.js, WebSocketContext.jsx, websocket.js, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, message.service.js, PageContext.jsx, ChatView.jsx 
+CHAT WITH CHATBOT - ensureChatbotUser.js, AuthContext.js, auth.routes.js, passport.js, auth.routes.js, Sidebar.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, message.service.js, PageContext.jsx, ChatView.jsx, chatbot.routes.js, chatbot.controller.js, message.service.js, PageContext.jsx, ChatView.jsx
+D6, K18, & K26. backend service layer writes to db via Prisma and returns full message object */
 async function createMessage(senderId, chatId, content) {
   try {
     if (!content?.trim()) {
@@ -37,6 +40,7 @@ async function createMessage(senderId, chatId, content) {
         recipientId,
         chatId,
       },
+      // fetches sender, recipient, and chat.members as part of the response
       include: {
         sender: true,
         recipient: true,
@@ -58,6 +62,8 @@ async function createMessage(senderId, chatId, content) {
   }
 }
 
+/* DELETES A MESSAGE - AuthContext.js, auth.routes.js, passport.js, auth.routes.js, WebSocketContext.jsx, websocket.js, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, message.service.js, PageContext.jsx, ChatView.jsx 
+E6. backend service layer updates db via Prisma and returns soft deleted object */
 async function softDeleteMessageByUser(messageId, userId) {
   try {
     // finds the message with matching id
