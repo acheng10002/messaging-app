@@ -17,7 +17,11 @@ const {
 /* ws - specific client's websocket connection
 parsed - incoming client message parsed into JSON object */
 async function routeWebSocketMessage(ws, parsed) {
-  // logs every incoming message
+  /* logs every incoming client message 
+  AFTER WEBSOCKET CONNECTED FOR USER ID,
+  CONFIRMS FRONTEND WEBSOCKET REQUESTS,
+  AUTOMATICALLY FETCHES CURRENT USER CHATS, RETRIEVES ONLINE USERS, RETRIEVES OFFLINE USERS
+  */
   console.log("Incoming WS message:", parsed);
   switch (parsed.type) {
     /* A5. GETS USER CHATS - AuthContext.js, auth.routes.js, passport.js, WebSocketContext.jsx, websocket.js, PageContext.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatsPanel.jsx   
@@ -28,13 +32,18 @@ async function routeWebSocketMessage(ws, parsed) {
         - "chats_list" server response/message type */
       return handleGetUserChats(ws);
     /* B5. GETS SELECTED CHAT - AuthContext.js, auth.routes.js, passport.js, WebSocketContext.jsx, websocket.js, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx 
-    - backend router routes "get_chat" client message to backend message handler/chatHandlers.js */
+    K7. CHAT WITH CHATBOT - ensureChatbotUser.js, AuthContext.js, auth.routes.js, passport.js, auth.routes.js, Sidebar.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, message.service.js, PageContext.jsx, ChatView.jsx, chatbot.routes.js, chatbot.controller.js, message.service.js, PageContext.jsx, ChatView.jsx
+    - backend router routes "get_chat" client message to backend message handler/chatHandlers.js 
+    - AFTER WEBSOCKET CONNECTED FOR USER ID,
+      CONFIRMS FRONTEND WEBSOCKET REQUESTS,
+      AUTOMATICALLY FETCHES CURRENT USER CHATS, RETRIEVES ONLINE USERS, RETRIEVES OFFLINE USERS
+      USER REQUESTS FULL DETAILS FOR A CHAT ID
+    - ex. Incoming WS message: { type: 'get_chat', chatId: 17 } */
     case "get_chat":
       /* B6. backend message handler gets specific chat via getChatById(authenticatedId) service function   
       - "chat_history" server response/message type */
       return handleGetChat(ws, parsed);
     /* C5. FINDS OR CREATES A CHAT - AuthContext.js, auth.routes.js, passport.js, WebSocketContext.jsx, websocket.js, Sidebar.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx 
-    K7. CHAT WITH CHATBOT - ensureChatbotUser.js, AuthContext.js, auth.routes.js, passport.js, auth.routes.js, Sidebar.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, message.service.js, PageContext.jsx, ChatView.jsx, chatbot.routes.js, chatbot.controller.js, message.service.js, PageContext.jsx, ChatView.jsx
     - backend router routes "find_or_create_chat" client message to server message handler/chatHandlers.js */
     case "find_or_create_chat":
       /* C6. & K8. backend message handler finds or creates the chat via findOrCreateChat(userAId, userBId) service layer
@@ -42,8 +51,15 @@ async function routeWebSocketMessage(ws, parsed) {
       return handleFindOrCreateChat(ws, parsed);
     /* D5. CREATES A MESSAGE - AuthContext.js, auth.routes.js, passport.js, WebSocketContext.jsx, websocket.js, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, message.service.js, PageContext.jsx, ChatView.jsx
     K15. CHAT WITH CHATBOT
-    - backend router routes "new_message" client message to backend message handler/chatHandlers.js */
+    - backend router routes "new_message" client message to backend message handler/chatHandlers.js 
+    - AFTER WEBSOCKET CONNECTED FOR USER ID,
+      CONFIRMS FRONTEND WEBSOCKET REQUESTS,
+      AUTOMATICALLY FETCHES CURRENT USER CHATS, RETRIEVES ONLINE USERS, RETRIEVES OFFLINE USERS
+      USER REQUESTS FULL DETAILS FOR A CHAT ID
+      CONFIRMS USER HAS SUBMITTED A MESSAGE TO THE CHATBOT VIA WEBSOCKET
+    - ex. Incoming WS message: { type: 'create_message', chatId: 17, content: 'What is the capital of Vermont?'} */
     case "create_message":
+      // CONFIRMS MESSAGE HANDED OFF TO THE MESSAGE HANDLER FOR ROUTING
       console.log("Routing to handleChat with data:", parsed);
       /* D6. * K16. backend message handler saves the message via createMessage(senderId, chatId, content) service function 
       - "new_message" server response/message type */

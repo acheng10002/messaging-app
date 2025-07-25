@@ -42,7 +42,7 @@ function setupWebSocket(server) {
   E. DELETES A MESSAGE - AuthContext.js, auth.routes.js, passport.js, auth.routes.js, WebSocketContext.jsx, websocket.js, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, message.service.js,PageContext.jsx, ChatView.jsx 
   F. GETS ONLINE USERS - AuthContext.js, auth.routes.js, passport.js, auth.routes.js, WebSocketContext.jsx, websocket.js, PageContext.jsx, websocket.js, websocket.handlers.js, userHandlers.js, user.service.js, PageContext.jsx, Sidebar.jsx
   G. GETS OFFLINE USERS - AuthContext.js, auth.routes.js, passport.js, auth.routes.js, WebSocketContext.jsx, websocket.js, PageContext.jsx, websocket.js, websocket.handlers.js, userHandlers.js, user.service.js, PageContext.jsx, Sidebar.jsx
-  K. CHAT WITH CHATBOT - ensureChatbotUser.js, AuthContext.js, auth.routes.js, passport.js, auth.routes.js, Sidebar.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, message.service.js, PageContext.jsx, ChatView.jsx, chatbot.routes.js, chatbot.controller.js, message.service.js, PageContext.jsx, ChatView.jsx
+  K. CHAT WITH CHATBOT - ensureChatbotUser.js, AuthContext.js, auth.routes.js, passport.js, auth.routes.js, Sidebar.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, messageo.service.js, PageContext.jsx, ChatView.jsx, chatbot.routes.js, chatbot.controller.js, message.service.js, PageContext.jsx, ChatView.jsx
   - A2, B2, C2, D2, E2, F2, G2 server-side WebSocket Events fired by my WebSocket server
   - these events accept and authenticate connections; focused on infrastructure and protocol-level handling
   - they also manage lifecycle and messaging; server listens for upgrade, connection, messages, errors, and disconnects
@@ -124,7 +124,8 @@ function setupWebSocket(server) {
      - WebSocket retrieves live data after .on("connection"); enables realtime communication and updates */
   wss.on("connection", (ws) => {
     /* confirmation message iding the connected user (previously attached id 
-    during WebSocket upgrade with the decoded JWT) */
+    during WebSocket upgrade with the decoded JWT) 
+    CONFIRMS WEBSOCKET CONNECTION WAS SUCCESSFULLY ESTABLISHED FOR THE USER WITH ID ws.user.id */
     console.log(`WebSocket connected for user ${ws.user.id}`);
 
     /* gets id of authenticated user from WebSocket connection 

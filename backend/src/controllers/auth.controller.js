@@ -72,15 +72,6 @@ const logout = async (req, res, next) => {
     if (userSockets) {
       userSockets.forEach((ws) => ws.close());
     }
-    /*
-    // waits a short delay to ensure `ws.on("close")` has removed the user from `activeConnections`
-    setTimeout(() => {
-      // broadcasts updated online list
-      handleOnlineUsers();
-      // broadcasts updated offline list
-      handleOfflineUsers();
-    }, 100);
-    */
 
     res.json({
       message: "Logged out successfully: client should discard token",

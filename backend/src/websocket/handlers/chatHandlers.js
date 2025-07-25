@@ -117,6 +117,13 @@ ws - specific client's websocket connection
 parsed - incoming client message parsed into JSON object */
 async function handleChat(ws, parsed) {
   try {
+    /* - AFTER WEBSOCKET CONNECTED FOR USER ID,
+    CONFIRMS FRONTEND WEBSOCKET REQUESTS,
+    AUTOMATICALLY FETCHES CURRENT USER CHATS, RETRIEVES ONLINE USERS, RETRIEVES OFFLINE USERS,
+    USER REQUESTS FULL DETAILS FOR A CHAT ID,
+    USER HAS SUBMITTED A MESSAGE TO THE CHATBOT VIA WEBSOCKET,
+    MESSAGE HANDED OFF TO THE MESSAGE HANDLER FOR ROUTING, 
+    CONFIRMS HANDLECHAT WAS INVOKED WITH THE CORRECT DATA */
     console.log("handleChat invoked with data:", parsed);
     // persists the message to db via createMessage service function returns the full message
     const message = await createMessage(
@@ -127,7 +134,16 @@ async function handleChat(ws, parsed) {
       // actual message text
       parsed.content
     );
-
+    /* - AFTER WEBSOCKET CONNECTED FOR USER ID,
+    CONFIRMS FRONTEND WEBSOCKET REQUESTS,
+    AUTOMATICALLY FETCHES CURRENT USER CHATS, RETRIEVES ONLINE USERS, RETRIEVES OFFLINE USERS,
+    USER REQUESTS FULL DETAILS FOR A CHAT ID,
+    USER HAS SUBMITTED A MESSAGE TO THE CHATBOT VIA WEBSOCKET,
+    MESSAGE HANDED OFF TO THE MESSAGE HANDLER FOR ROUTING, 
+    HANDLECHAT WAS INVOKED WITH THE CORRECT DATA, 
+    CONTENT WAS NON-EMPTY AND PASSED VALIDATION,
+    THE JWT TOKEN WAS INCLUDED WITH THE REQUEST FOR AUTHENTICATION,
+    CONFIRMS THE USER'S MESSAGE WAS SUCCESSFULLY WRITTEN TO THE DB, INCLUDING METADATA */
     console.log("Message created in DB:", message);
 
     // ensures saved message is linked to a valid chat object and that chat includes member info
@@ -140,7 +156,7 @@ async function handleChat(ws, parsed) {
         })
       );
     }
-
+    // CONFIRMS MESSAGE IS BEING SENT IN REAL-TIME TO BOTH CHAT MEMBERS
     console.log(
       "Broadcasting new_message to chat members:",
       message.chat.members.map((m) => m.id)
