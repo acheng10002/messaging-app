@@ -1,5 +1,4 @@
-/* 
-K. CHAT WITH CHATBOT - ensureChatbotUser.js, AuthContext.js, auth.routes.js, passport.js, auth.routes.js, Sidebar.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx, chatbot.routes.js, chatbot.controller.js, chat.service.js, PageContext.jsx, ChatView.jsx
+/* K. CHAT WITH CHATBOT - ensureChatbotUser.js, AuthContext.js, auth.routes.js, passport.js, auth.routes.js, Sidebar.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx, websocket.js, websocket.handlers.js, chatHandlers.js, chat.service.js, PageContext.jsx, ChatView.jsx, chatbot.routes.js, chatbot.controller.js, chat.service.js, PageContext.jsx, ChatView.jsx
 K1. creates the chatbot user once on server start */
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
